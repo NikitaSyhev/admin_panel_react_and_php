@@ -1,0 +1,32 @@
+{
+  "name": "admin_panel_react_and_php",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "browserslist": [
+    "last 2 chrome versions",
+    "last 2 firefox versions",
+    "last 2 ios versions"
+  ],
+  "description": "",
+  "dependencies": {
+    "jquery": "^3.7.1",
+    "sass": "^1.83.4"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.26.0",
+    "@babel/preset-env": "^7.26.0",
+    "@babel/preset-react": "^7.26.3",
+    "babel-loader": "^9.2.1",
+    "core-js": "^3.40.0",
+    "gulp": "^5.0.0",
+    "gulp-sass": "^6.0.0",
+    "webpack": "^5.97.1",
+    "webpack-cli": "^6.0.1",
+    "webpack-stream": "^7.0.0"
+  }
+}
