@@ -54,13 +54,12 @@ gulp.task("build-sass",()=>{
 
 gulp.task("copy-api",()=>{
   return gulp.src("./app/api/**/*.*")
-              .pipe(sass().on('error', sass.logError))
+      
               .pipe(gulp.dest(dist + "/api"))
 });
 
 gulp.task("copy-assets",()=>{
   return gulp.src("./app/assets/**/*.*")
-              .pipe(sass().on('error', sass.logError))
               .pipe(gulp.dest(dist + "/assets"))
 });
 
