@@ -1,6 +1,8 @@
 
 <?php
 
+//преобразовывает входящие данные из JSON в массив
+$_POST = json_decode(file_get_contents("php://input"), true);
 if (isset($_POST["name"]) && preg_match('/^[a-zA-Z0-9-_]+$/', $_POST["name"])) {
     $newFile = "../../" . $_POST["name"] . ".html";
 
@@ -10,8 +12,8 @@ if (isset($_POST["name"]) && preg_match('/^[a-zA-Z0-9-_]+$/', $_POST["name"])) {
     } else {
         $handle = fopen($newFile, "w");
         if ($handle) {
-            // Здесь можно записывать данные в файл
-            fclose($handle); // Закрываем файл
+            
+            fclose($handle); 
             echo "Файл успешно создан.";
         } else {
             header("HTTP/1.0 500 Internal Server Error");

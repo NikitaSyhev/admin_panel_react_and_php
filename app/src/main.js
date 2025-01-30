@@ -1,32 +1,10 @@
-import $ from 'jquery';
 
+import React from 'react';
+import { createRoot } from 'react-dom/client'; // Импортируем createRoot
+import Editor from './components/editor';
 
-//функция для для отправки get запросов, чтобы отображать их на странице
-function getPageList() {
-    $("h1").remove();
-    $.get("./api/index.php", data => {
-        data.forEach(file=> {
-            $("body").append(`<h1>${file}</h1>`)
-        })
-}, "JSON");
-}
-
-getPageList();
-
-
-
-
-
-$("button").on("click", () => {
-    $.post("./api/createNewPage.php", {
-        "name": $("input").val()
-    }, () => {
-        getPageList();
-    })
-    .fail((jqXHR, textStatus, errorThrown) => {
-        console.error("Ошибка при выполнении запроса:", textStatus, errorThrown);
-    });
-});
+const root = createRoot(document.getElementById('root')); // Создаем root
+root.render(<Editor />); // Рендерим компонент
 
 
 
