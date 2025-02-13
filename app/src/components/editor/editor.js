@@ -32,38 +32,61 @@ export default class Editor extends Component {
     //метод open для открытия страницы
     open(page) {
         this.currentPage = `../${page}`;
-        this.iframe.load(this.currentPage, ()=> {   
-            const body = this.iframe.contentDocument.body;
 
-            let textNodes = [];
-
-            function recursy (element) {
-                element.childNodes.forEach(node => {
-                   
-                    //добавляем ноды #text в массив textNodes
-                    if(node.nodeName === "#text" && node.nodeValue.replace(/\s+/g, "").length > 0) {
-                        
-                        textNodes.push(node);
-                    } else {
-                        recursy(node);
-                    }
-            })
-            };
-
-            recursy(body);
-
-            //присваиваем атрибут Contenteditable к нодам ( нужно для редактирования текста)
-            textNodes.forEach(node => {
-                const wrapper = this.iframe.contentDocument.createElement('text-editor');
-                node.parentNode.replaceChild(wrapper, node);
-                wrapper.appendChild(node);
-                //присвоили атрибут
-                wrapper.contentEditable = "true";
-            });
-        
-        });
+        axios
+            .get(`../${page}`)
+            .then(res=>this.parseStringToDOm(res.data))
+            .then(this.wrapTextNodes)
+            .then(this.serialiseDOMtoString)
+            .then(html => axios.post("./api/saveTempPage.php", {html}))
+            .then(()=>this.iframe.load("../temp.html"))
+            .then( () => this.enableEditing())
     }
 
+    //метод для включения редактирования
+
+    enableEditing () {
+        this.iframe.contentDocument.body.querySelectorAll("text-editor").forEach( element =>{
+            //присвоили атрибут
+            element.contentEditable = "true";
+        })
+    }
+
+    //превращение строк в DOM дерево 
+    parseStringToDOm(str) {
+        const parser = new DOMParser();
+        return parser.parseFromString(str, "text/html");
+    }
+
+    //метод для оборачивания текстовых узлов
+    wrapTextNodes(dom) {
+        const body = dom.body;
+        let textNodes = [];
+        function recursy (element) {
+            element.childNodes.forEach(node => {
+                //добавляем ноды #text в массив textNodes
+                if(node.nodeName === "#text" && node.nodeValue.replace(/\s+/g, "").length > 0) {          
+                    textNodes.push(node);
+                } else {
+                    recursy(node);
+                }
+        })
+        };
+        recursy(body);
+        //присваиваем атрибут Contenteditable к нодам ( нужно для редактирования текста)
+        textNodes.forEach(node => {
+            const wrapper = dom.createElement('text-editor');
+            node.parentNode.replaceChild(wrapper, node);
+            wrapper.appendChild(node);
+        });
+        return dom;
+    }
+
+    //метод для превращения DOM в строку
+    serialiseDOMtoString(dom) {
+        const serialiser = new XMLSerializer();
+        return serialiser.serializeToString(dom);
+    }
 
 
     //метод для загрузки страниц с сервера
