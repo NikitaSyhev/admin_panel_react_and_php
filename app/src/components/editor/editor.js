@@ -3,6 +3,7 @@ import "../helpers/iframeLoader.js";
 
 import axios from 'axios';
 import React, {Component} from 'react';
+import DOMHelper from "../helpers/dom-helper.js";
 
 export default class Editor extends Component {
     constructor() {
@@ -14,7 +15,7 @@ export default class Editor extends Component {
         }
         this.createNewPage = this.createNewPage.bind(this);
     }
-    //метод для того, чтобы запрос на сервер осуществлялся после того, как страница отрендерилась
+    //метод для того, чDOMhelper запрос на сервер осуществлялся после того, как страница отрендерилась
     componentDidMount() {
         this.init(this.currentPage);
     }
@@ -32,13 +33,13 @@ export default class Editor extends Component {
 
         axios
             .get(`../${page}?rnd=${Math.random()}`)
-            .then(res => this.parseStrToDOM(res.data))
-            .then(this.wrapTextNodes)
+            .then(res => DOMHelper.parseStrToDOM(res.data))
+            .then(DOMHelper.wrapTextNodes)
             .then(dom => {
                 this.virtualDom = dom;
                 return dom;
             })
-            .then(this.serializeDOMToString)
+            .then(DOMHelper.serializeDOMToString)
             .then(html => axios.post("./api/saveTempPage.php", {html}))
             .then(() => this.iframe.load("../temp.html"))
             .then(() => this.enableEditing())
@@ -46,8 +47,8 @@ export default class Editor extends Component {
     //сохранение страницы на сервер
     save() {
         const newDom = this.virtualDom.cloneNode(this.virtualDom);
-        this.unwrapTextNodes(newDom);
-        const html = this.serializeDOMToString(newDom);
+        DOMHelper.unwrapTextNodes(newDom);
+        const html = DOMHelper.serializeDOMToString(newDom);
         axios
             .post("./api/savePage.php", {pageName: this.currentPage, html})
     }
@@ -68,50 +69,7 @@ export default class Editor extends Component {
         this.virtualDom.body.querySelector(`[nodeid="${id}"]`).innerHTML = element.innerHTML;
     }
 
-    //превращение строк в DOM дерево 
-    parseStrToDOM(str) {
-        const parser = new DOMParser();
-        return parser.parseFromString(str, "text/html");
-    }
-    //метод для оборачивания текстовых узлов
-    wrapTextNodes(dom) {
-        const body = dom.body;
-        let textNodes = [];
-
-        function recursy(element) {
-            element.childNodes.forEach(node => {
-                
-                if(node.nodeName === "#text" && node.nodeValue.replace(/\s+/g, "").length > 0) {
-                    textNodes.push(node);
-                } else {
-                    recursy(node);
-                }
-            })
-        };
-
-        recursy(body);
-
-        textNodes.forEach((node, i) => {
-            const wrapper = dom.createElement('text-editor');
-            node.parentNode.replaceChild(wrapper, node);
-            wrapper.appendChild(node);
-            wrapper.setAttribute("nodeid", i);
-        });
-
-        return dom;
-    }
-
-     //метод для превращения DOM в строку
-    serializeDOMToString(dom) {
-        const serializer = new XMLSerializer();
-        return serializer.serializeToString(dom);
-    }
-
-    unwrapTextNodes(dom) {
-        dom.body.querySelectorAll("text-editor").forEach(element => {
-            element.parentNode.replaceChild(element.firstChild, element);
-        });
-    }
+ 
 
     //метод для загрузки страниц с сервера
     loadPageList() {
