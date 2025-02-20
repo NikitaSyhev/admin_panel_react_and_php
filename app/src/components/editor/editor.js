@@ -4,6 +4,7 @@ import "../helpers/iframeLoader.js";
 import axios from 'axios';
 import React, {Component} from 'react';
 import DOMHelper from "../helpers/dom-helper.js";
+import EditorText from "../editor-text/";
 
 export default class Editor extends Component {
     constructor() {
@@ -43,6 +44,7 @@ export default class Editor extends Component {
             .then(html => axios.post("./api/saveTempPage.php", {html}))
             .then(() => this.iframe.load("../temp.html"))
             .then(() => this.enableEditing())
+            .then(() => this.injectStyles());
     }
     //сохранение страницы на сервер
     save() {
@@ -56,20 +58,27 @@ export default class Editor extends Component {
     //метод для включения редактирования
     enableEditing() {
         this.iframe.contentDocument.body.querySelectorAll("text-editor").forEach(element => {
-            element.contentEditable = "true";
-            element.addEventListener("input", () => {
-                this.onTextEdit(element);
-            })
+            const id = element.getAttribute("nodeid");
+            const virtualElement = this.virtualDom.body.querySelector(`[nodeid="${id}"]`);
+            new EditorText (element, virtualElement);
         });
     }
 
-    
-    onTextEdit(element) {
-        const id = element.getAttribute("nodeid");
-        this.virtualDom.body.querySelector(`[nodeid="${id}"]`).innerHTML = element.innerHTML;
+    //метод для добавления стилей
+    injectStyles () {
+        const style = this.iframe.contentDocument.createElement("style");
+        style.innerHTML =`
+            text-editor:hover {
+                outline:3px solid orange;
+                outline-offset: 8px;
+            }
+                text-editor:focus {
+                outline:3px solid red;
+                outline-offset: 8px;
+            }
+        `;
+        this.iframe.contentDocument.head.appendChild(style);
     }
-
- 
 
     //метод для загрузки страниц с сервера
     loadPageList() {
