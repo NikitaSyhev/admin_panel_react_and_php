@@ -6,6 +6,8 @@ import React, {Component} from 'react';
 import DOMHelper from "../helpers/dom-helper.js";
 import EditorText from "../editor-text/";
 
+import UIkit from "uikit";
+
 export default class Editor extends Component {
     constructor() {
         super();
@@ -104,30 +106,13 @@ export default class Editor extends Component {
     }
 
     render() {
-        // const {pageList} = this.state;
-        // const pages = pageList.map((page, i) => {
-        //     return (
-        //         <h1 key={i}>{page}
-        //             <a 
-        //             href="#"
-        //             onClick={() => this.deletePage(page)}>(x)</a>
-        //         </h1>
-        //     )
-        // });
-
         return (
             <>
-                <button onClick={() => this.save()}>Click</button>
+                <button class="uk-button uk-button-primary">Primary</button>
+                {/* <button onClick={() => this.save()}>Click</button> */}
                 <iframe src={this.currentPage} frameBorder="0"></iframe>
             </>
             
-            // <>
-            //     <input
-            //         onChange={(e) => {this.setState({newPageName: e.target.value})}} 
-            //         type="text"/>
-            //     <button onClick={this.createNewPage}>Создать страницу</button>
-            //     {pages}
-            // </>
         )
     }
 }
