@@ -1,4 +1,5 @@
 
+
 import "../helpers/iframeLoader.js";
 
 import axios from 'axios';
@@ -8,15 +9,20 @@ import EditorText from "../editor-text/";
 
 import UIkit from "uikit";
 
+import Spinner from "../spinner/spinner.js";
+
 export default class Editor extends Component {
     constructor() {
         super();
         this.currentPage = "index.html";
         this.state = {
             pageList: [],
-            newPageName: ""
+            newPageName: "",
+            loading: true,
         }
         this.createNewPage = this.createNewPage.bind(this);
+        this.isLoading = this.isLoading.bind(this);
+        this.isLoaded = this.isLoaded.bind(this);
     }
     //метод для того, чDOMhelper запрос на сервер осуществлялся после того, как страница отрендерилась
     componentDidMount() {
@@ -26,12 +32,12 @@ export default class Editor extends Component {
     //мктод инициализации страницы
     init(page) {
         this.iframe = document.querySelector('iframe');
-        this.open(page);
+        this.open(page, this.isLoaded);
         this.loadPageList();
     }
 
     //метод open для открытия страницы
-    open(page) {
+    open(page, cb) {
         this.currentPage = page;
 
         axios
@@ -46,15 +52,21 @@ export default class Editor extends Component {
             .then(html => axios.post("./api/saveTempPage.php", {html}))
             .then(() => this.iframe.load("../temp.html"))
             .then(() => this.enableEditing())
-            .then(() => this.injectStyles());
+            .then(() => this.injectStyles())
+            .then(cb);
     }
     //сохранение страницы на сервер
-    save() {
+    save(onSuccess, onError) {
+       
+        this.isLoading();
         const newDom = this.virtualDom.cloneNode(this.virtualDom);
         DOMHelper.unwrapTextNodes(newDom);
         const html = DOMHelper.serializeDOMToString(newDom);
         axios
             .post("./api/savePage.php", {pageName: this.currentPage, html})
+            .then(onSuccess)
+            .catch(onError)
+            .finally(this.isLoaded);
     }
 
     //метод для включения редактирования
@@ -105,14 +117,59 @@ export default class Editor extends Component {
             .catch(() => alert("Страницы не существует!"));
     }
 
+
+    //работа со спиннером
+    isLoading() {
+        this.setState({
+            loading: true
+        })
+    }
+
+    //метод срабатывает после загрузки спиннера
+    isLoaded() {
+        this.setState({
+            loading: false
+        })
+    }
+
+
+
     render() {
+        const {loading} = this.state;
+        const modal = true;
+        let spinner;
+        
+        loading ? spinner = <Spinner active/> : spinner = <Spinner />
+
         return (
             <>
-                <button class="uk-button uk-button-primary">Primary</button>
-                {/* <button onClick={() => this.save()}>Click</button> */}
                 <iframe src={this.currentPage} frameBorder="0"></iframe>
+                
+                {spinner}
+
+                <div className="panel">
+                    <button className="uk-button uk-button-primary" uk-toggle="target: #modal-save" onClick={() => this.save()}>Опубликовать</button>
+                </div>
+                
+                <div id="modal-save" uk-modal={modal.toString()}>
+                    <div className="uk-modal-dialog uk-modal-body">
+                        <h2 className="uk-modal-title">Сохранение</h2>
+                        <p>Вы действительно хотите сохранить изменения?</p>
+                        <p className="uk-text-right">
+                            <button className="uk-button uk-button-default uk-modal-close" type="button">Отменить</button>
+                            <button 
+                                className="uk-button uk-button-primary uk-modal-close" 
+                                type="button"
+                                onClick={() => this.save(() => {
+                                    UIkit.notification({message: 'Успешно сохранено', status: 'success'})
+                                },
+                                () => {
+                                    UIkit.notification({message: 'Ошибка сохранения', status: 'danger'})
+                                })}>Опубликовать</button>
+                        </p>
+                    </div>
+                </div>
             </>
-            
         )
     }
 }
