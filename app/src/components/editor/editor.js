@@ -156,18 +156,19 @@ export default class Editor extends Component {
 
         return (
             <>
-                <iframe src={this.currentPage} frameBorder="0"></iframe>
+                 <iframe src="" frameBorder="0"></iframe>
                 
                 {spinner}
                
                 <div className="panel">
                     <button className="uk-button uk-button-primary uk-margin-small-right" uk-toggle="target: #modal-open" onClick={() => this.save()}>Открыть</button>
-                    
                     <button className="uk-button uk-button-primary" uk-toggle="target: #modal-save" onClick={() => this.save()}>Опубликовать</button>
+                    <button className="uk-button uk-button-default" uk-toggle="target: #modal-backup">Восстановить</button>
                 </div>
                 
                 <ConfirmModal modal={modal}  target={'modal-save'} method={this.save}/>
                 <ChooseModal modal={modal}  target={'modal-open'} data={pageList} redirect={this.init}/>
+                <ChooseModal modal={modal}  target={'modal-backup'} data={pageList} redirect={this.init}/>
             </>
         )
     }
