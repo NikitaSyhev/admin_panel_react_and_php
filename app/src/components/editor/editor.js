@@ -10,6 +10,8 @@ import UIkit from "uikit";
 import Spinner from "../spinner/spinner.js";
 import ConfirmModal from "../confirm-modal/confirm-modal.js";
 import ChooseModal from "../choose-modal/choose-modal.js";
+import EditorMeta from "../editor-meta/editor-meta.js";
+
 
 
 export default class Editor extends Component {
@@ -166,7 +168,7 @@ export default class Editor extends Component {
         const modal = true;
         let spinner;
 
-        console.log(backupsList);
+        // console.log(backupsList);
         
         loading ? spinner = <Spinner active/> : spinner = <Spinner />
 
@@ -181,13 +183,15 @@ export default class Editor extends Component {
                
                 <div className="panel">
                     <button className="uk-button uk-button-primary uk-margin-small-right" uk-toggle="target: #modal-open">Открыть</button>
-                    <button className="uk-button uk-button-primary" uk-toggle="target: #modal-save" onClick={() => this.save()}>Опубликовать</button>
+                    <button className="uk-button uk-button-primary uk-margin-small-right" uk-toggle="target: #modal-meta">Редактировать МЕТА</button>
+                    <button className="uk-button uk-button-primary uk-margin-small-right" uk-toggle="target: #modal-save" onClick={() => this.save()}>Опубликовать</button>
                     <button className="uk-button uk-button-default" uk-toggle="target: #modal-backup">Восстановить</button>
                 </div>
                 
                 <ConfirmModal modal={modal}  target={'modal-save'} method={this.save}/>
                 <ChooseModal modal={modal}  target={'modal-open'} data={pageList} redirect={this.init}/>
                 <ChooseModal modal={modal}  target={'modal-backup'} data={backupsList} redirect={this.restoreBackup}/>
+                {this.virtualDom ?  <EditorMeta modal={modal}  target={'modal-meta'} virtualDom={this.virtualDom}/> : false}
             </>
         )
     }
