@@ -1,6 +1,8 @@
 @use '../../node_modules/uikit/src/scss/variables-theme' as variables;
 @use '../../node_modules/uikit/src/scss/mixins-theme' as mixins;
 @use '../../node_modules/uikit/src/scss/uikit-theme';
+
+@use 'sass:color';
 $panel_height: 64px;
 
 *{
