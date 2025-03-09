@@ -11,6 +11,7 @@ import Spinner from "../spinner/spinner.js";
 import ConfirmModal from "../confirm-modal/confirm-modal.js";
 import ChooseModal from "../choose-modal/choose-modal.js";
 import EditorMeta from "../editor-meta/editor-meta.js";
+import EditorImages from "../../editor-images/editor-images.js";
 
 
 
@@ -91,10 +92,18 @@ export default class Editor extends Component {
 
     //метод для включения редактирования
     enableEditing() {
+        //работа с текстом
         this.iframe.contentDocument.body.querySelectorAll("text-editor").forEach(element => {
             const id = element.getAttribute("nodeid");
             const virtualElement = this.virtualDom.body.querySelector(`[nodeid="${id}"]`);
             new EditorText (element, virtualElement);
+        });
+
+        //работа с картинками
+        this.iframe.contentDocument.body.querySelectorAll("[editableingid]").forEach(element => {
+            const id = element.getAttribute("editableingid");
+            const virtualElement = this.virtualDom.body.querySelector(`[editableingid="${id}"]`);
+            new EditorImages (element, virtualElement, this.isLoading, this.isLoaded, this.showNotifications);
         });
     }
 
@@ -107,6 +116,11 @@ export default class Editor extends Component {
                 outline-offset: 8px;
             }
                 text-editor:focus {
+                outline:3px solid red;
+                outline-offset: 8px;
+            }
+
+            [editableingid]:hover {
                 outline:3px solid red;
                 outline-offset: 8px;
             }
@@ -180,6 +194,7 @@ export default class Editor extends Component {
         return (
             <>
                  <iframe src="" frameBorder="0"></iframe>
+                 <input id="img-upload" type="file" accept="image/*" style={{display: 'none'}}></input>
                 
                 {spinner}
                
