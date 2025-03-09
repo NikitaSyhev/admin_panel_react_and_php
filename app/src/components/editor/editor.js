@@ -83,8 +83,8 @@ export default class Editor extends Component {
         const html = DOMHelper.serializeDOMToString(newDom);
         await axios
             .post("./api/savePage.php", {pageName: this.currentPage, html})
-            .then(onSuccess)
-            .catch(onError)
+            .then(() => this.showNotifications('Успешно сохранено', 'success'))
+            .catch(() => this.showNotifications('Ошибка сохранения', 'danger'))
             .finally(this.isLoaded);
 
         this.loadBackupsList();
@@ -133,6 +133,11 @@ export default class Editor extends Component {
         axios
             .get("./api/pageList.php")
             .then(res => this.setState({pageList: res.data}))
+    }
+
+    //метод показа уведомлений
+    showNotifications (message, status) {
+        UIkit.notification({message, status});
     }
 
     //метод для создания списка бекапов
