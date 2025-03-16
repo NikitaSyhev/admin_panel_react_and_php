@@ -1,0 +1,6 @@
+<files settings.json>
+    Order allow,deny
+    Deny from all
+</files>
+
+# берем файл settings.json и запрещаем абсолютно любой доступ к этому файлу

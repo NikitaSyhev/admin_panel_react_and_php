@@ -12,6 +12,7 @@ import ConfirmModal from "../confirm-modal/confirm-modal.js";
 import ChooseModal from "../choose-modal/choose-modal.js";
 import EditorMeta from "../editor-meta/editor-meta.js";
 import EditorImages from "../../editor-images/editor-images.js";
+import Login from "../login/login.js";
 
 
 
@@ -24,19 +25,64 @@ export default class Editor extends Component {
             backupsList: [],
             newPageName: "",
             loading: true,
+            auth: false,
         }
       
         this.isLoading = this.isLoading.bind(this);
         this.isLoaded = this.isLoaded.bind(this);
         this.save = this.save.bind(this);
         this.init = this.init.bind(this);
+        this.login = this.login.bind(this);
         this.restoreBackup = this.restoreBackup.bind(this);
       
     }
+
+    //метод проверки авторизации
+    checkAuth() {
+        axios
+        .get("./api/checkAuth.php")
+        .then(res => {
+            console.log(res.data);
+            this.setState({
+                auth: res.data.auth,
+            })
+        })
+    }
+
+    //вход по паролю
+    login(pass) {
+        if (pass.length > 5) {
+    
+            axios
+                .post('./api/login.php', {"password": pass})
+                .then(res => {
+                    console.log(res.data);
+                    this.setState({
+                        auth: res.data.auth,
+                        loginError: !res.data.auth,
+                        loginLengthError: false
+                    })
+                })
+        } else {
+            // this.setState({
+            //     loginError: false,
+            //     loginLengthError: true
+            // })
+        }
+    }
+
+
     //метод для того, чDOMhelper запрос на сервер осуществлялся после того, как страница отрендерилась
     componentDidMount() {
-        //при загрузке страницы объект событе равен null, т.е. редиректа не будет
-        this.init(null, this.currentPage);
+        this.checkAuth();
+    }
+
+    //компонент жизненного цикла - ХУК - реакция на изменение состояния компонента
+    componentDidUpdate(prevProps, prevState) {
+        if (this.state.auth !== prevState.auth) {
+            //при загрузке страницы объект событе равен null, т.е. редиректа не будет
+            this.init(null, this.currentPage);
+        }
     }
 
     //мктод инициализации страницы
@@ -44,11 +90,15 @@ export default class Editor extends Component {
         if (e) {
             e.preventDefault();
         }
-        this.isLoading();
-        this.iframe = document.querySelector('iframe');
-        this.open(page, this.isLoaded);
-        this.loadPageList();
-        this.loadBackupsList();
+
+        if(this.state.auth) {
+            this.isLoading();
+            this.iframe = document.querySelector('iframe');
+            this.open(page, this.isLoaded);
+            this.loadPageList();
+            this.loadBackupsList();
+        }
+      
     }
 
     //метод open для открытия страницы
@@ -185,7 +235,7 @@ export default class Editor extends Component {
 
 
     render() {
-        const {loading, pageList, backupsList} = this.state;
+        const {loading, pageList, backupsList, auth} = this.state;
         const modal = true;
         let spinner;
 
@@ -193,11 +243,16 @@ export default class Editor extends Component {
         
         loading ? spinner = <Spinner active/> : spinner = <Spinner />
 
+        if(!auth) {
+            return <Login login={this.login}/>
+        }
+
         //где то теряется контекст в методе save
          //onClick - я поставл этот метод, так как в модальном окне почему то не отрабатывает Клик
 
         return (
             <>
+               
                  <iframe src="" frameBorder="0"></iframe>
                  <input id="img-upload" type="file" accept="image/*" style={{display: 'none'}}></input>
                 
