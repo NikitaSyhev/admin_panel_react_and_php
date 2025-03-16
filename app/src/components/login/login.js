@@ -21,9 +21,8 @@ export default class Login extends Component {
 
         let renderLogErr, renderLengthErr;
 
-        logErr ? renderLogErr = <span className="login-error">Введен неправильный пароль!</span> : null;
-
-        lengthErr ? renderLengthErr = <span className="login-error">Пароль должен быть длиннее 5 символов</span> : null;
+        logErr ? renderLogErr = <span style={{ display: 'block', color: 'red', marginTop: '10px' }} className="login-error">Введен неправильный пароль!</span> : null;
+        lengthErr ? renderLengthErr = <span style={{ display: 'block', color: 'red', marginTop: '10px' }} className="login-error">Пароль должен быть длиннее 5 символов</span> : null;
 
         return (
             <div style={{

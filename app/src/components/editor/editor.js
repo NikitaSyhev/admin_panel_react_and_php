@@ -26,13 +26,16 @@ export default class Editor extends Component {
             newPageName: "",
             loading: true,
             auth: false,
+            loginError: false,
+            loginLength: false,
         }
       
         this.isLoading = this.isLoading.bind(this);
         this.isLoaded = this.isLoaded.bind(this);
         this.save = this.save.bind(this);
         this.init = this.init.bind(this);
-        this.login = this.login.bind(this);
+        this.login = this.login.bind(this);this.logout
+        this.logout = this.logout.bind(this);
         this.restoreBackup = this.restoreBackup.bind(this);
       
     }
@@ -60,15 +63,24 @@ export default class Editor extends Component {
                     this.setState({
                         auth: res.data.auth,
                         loginError: !res.data.auth,
-                        loginLengthError: false
+                        loginLengthError: false,
                     })
                 })
         } else {
-            // this.setState({
-            //     loginError: false,
-            //     loginLengthError: true
-            // })
+            this.setState({
+                loginError: false,
+                loginLengthError: true,
+            })
         }
+    }
+
+    //метод завершения сеарнса авторизованного пользователя и перенаправление на стартовую страницу
+    logout() {
+        axios
+            .get("./api/logout.php")
+            .then(() => {
+                window.location.replace("/");
+            })
     }
 
 
@@ -235,7 +247,7 @@ export default class Editor extends Component {
 
 
     render() {
-        const {loading, pageList, backupsList, auth} = this.state;
+        const {loading, pageList, backupsList, auth, loginError, loginLengthError} = this.state;
         const modal = true;
         let spinner;
 
@@ -243,8 +255,8 @@ export default class Editor extends Component {
         
         loading ? spinner = <Spinner active/> : spinner = <Spinner />
 
-        if(!auth) {
-            return <Login login={this.login}/>
+        if (!auth) {
+            return <Login login={this.login} lengthErr={loginLengthError} logErr={loginError}/>
         }
 
         //где то теряется контекст в методе save
@@ -262,10 +274,29 @@ export default class Editor extends Component {
                     <button className="uk-button uk-button-primary uk-margin-small-right" uk-toggle="target: #modal-open">Открыть</button>
                     <button className="uk-button uk-button-primary uk-margin-small-right" uk-toggle="target: #modal-meta">Редактировать МЕТА</button>
                     <button className="uk-button uk-button-primary uk-margin-small-right" uk-toggle="target: #modal-save" onClick={() => this.save()}>Опубликовать</button>
-                    <button className="uk-button uk-button-default" uk-toggle="target: #modal-backup">Восстановить</button>
+                    <button className="uk-button uk-button-default uk-margin-small-right" uk-toggle="target: #modal-backup">Восстановить</button>
+                    <button className="uk-button uk-button-danger" uk-toggle="target: #modal-logout" onClick={() => this.logout()}>ВЫХОД</button>
                 </div>
                 
-                <ConfirmModal modal={modal}  target={'modal-save'} method={this.save}/>
+                <ConfirmModal 
+                    modal={modal}  
+                    target={'modal-save'} 
+                    method={this.save}
+                    text={{
+                        title: "Сохранение",
+                        descr: "Вы действительно хотите сохранить изменения?",
+                        btn: "Опубликовать"
+                    }}/>
+
+                <ConfirmModal 
+                    modal={modal}  
+                    target={'modal-logot'} 
+                    method={this.logout}
+                    text={{
+                        title: "Выход",
+                        descr: "Вы действительно хотите выйти?",
+                        btn: "Выйти"
+                    }}/>
                 <ChooseModal modal={modal}  target={'modal-open'} data={pageList} redirect={this.init}/>
                 <ChooseModal modal={modal}  target={'modal-backup'} data={backupsList} redirect={this.restoreBackup}/>
                 {this.virtualDom ?  <EditorMeta modal={modal}  target={'modal-meta'} virtualDom={this.virtualDom}/> : false}
