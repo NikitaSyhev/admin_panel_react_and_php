@@ -12,3 +12,9 @@ https://getuikit.com/
 Для создания HTTP запросов.<br>
 Сайт: <br>
 https://axios-http.com/
+
+`FRONTEND:`
+REACT
+
+`BACKEND:`
+PHP
